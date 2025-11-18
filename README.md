@@ -1,6 +1,6 @@
-# Claude/Codex API Smart Switch
+# Claude/Codex API 智能切换代理
 
-> **Intelligent Multi-API Gateway** - Supports Claude Code, Codex CLI, and OpenAI format with smart routing and failover
+> **多协议 AI API 网关** - 支持 Claude Code、Codex CLI 和 OpenAI 格式的智能转发与自动容错
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
@@ -8,79 +8,68 @@
 
 ---
 
-## 🌟 Features
+## 🌟 核心特性
 
-### 🔄 Intelligent API Management
-- **Multi-API Support**: Configure multiple Claude and Codex API keys
-- **Smart Failover**: Auto-switch to backup APIs on errors (3-error threshold)
-- **Priority Scheduling**: Automatic API selection by priority order
-- **Time-based Rotation**: Enable APIs by day of week (Monday-Sunday)
-- **Scheduled Activation**: Auto-activate API billing cycles at specified times
+### 🔄 智能多API管理
+- **多密钥轮换**: 配置多个 Claude 和 Codex API 密钥
+- **自动故障转移**: 错误达到阈值(3次)自动切换备用 API
+- **优先级调度**: 按配置顺序自动选择最优 API
+- **时间调度**: 支持按星期启用不同的 API
+- **定时激活**: 自动激活 API 计费周期
 
-### 🛡️ Advanced Error Handling
-- **Real-time Error Detection**: Monitor API errors and response quality
-- **Auto-switching**: Switch APIs when error threshold reached
-- **Cooldown Management**: 10-minute cooldown for failed APIs
-- **Retry Strategies**: Strategy retry, normal retry, and API switching
-- **Timeout Control**: Fine-grained timeout configuration
+### 🛡️ 高级容错机制
+- **实时错误检测**: 监控 API 响应状态和质量
+- **智能切换**: 主API失败自动切换备用API
+- **冷却管理**: 失败 API 进入10分钟冷却期
+- **多重试策略**: 策略重试、普通重试、API切换
+- **超时控制**: 精细化超时配置
 
-### 📊 Real-time Monitoring
-- **Token Statistics**: Track token usage per model and date
-- **Cache Analytics**: Separate stats for input, output, cache creation, cache read
-- **Web Dashboard**: Graphical configuration and monitoring interface
-- **Daily Reports**: Visualize usage patterns with charts
+### 📊 实时监控统计
+- **Token 统计**: 按模型和日期统计使用量
+- **缓存分析**: 区分输入、输出、缓存创建、缓存读取
+- **Web 仪表板**: 可视化图表和实时监控
+- **历史追踪**: 完整的请求和响应日志
 
-### 🔧 Flexible Configuration
-- **Web UI**: Manage all settings via browser
-- **Hot Reload**: Apply configuration changes without restart
-- **JSON Storage**: All configs saved in `json_data/all_configs.json`
+### 🔧 灵活配置
+- **Web 管理界面**: 浏览器图形化配置
+- **热重载**: 配置修改无需重启
+- **JSON 持久化**: 所有配置保存在 `json_data/all_configs.json`
 
 ---
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Prerequisites
+### 安装
 
-- Python 3.8+
-- pip package manager
-
-### Installation
-
-1. **Clone the repository**
 ```bash
+# 1. 克隆项目
 git clone git@github.com:cd555yong/codex_cc_switch.git
 cd codex_cc_switch
-```
 
-2. **Install dependencies**
-```bash
+# 2. 安装依赖
 pip install -r requirements.txt
-```
 
-3. **Configure API keys**
+# 3. 配置 API 密钥（通过 Web 界面或编辑配置文件）
 
-   Edit `json_data/all_configs.json` or use the web interface after starting the server.
-
-4. **Start the server**
-```bash
+# 4. 启动服务
 python app.py
 ```
 
-The server will start on port **5101**.
+服务将在端口 **5101** 启动。
 
-5. **Access Web Dashboard**
+### 访问管理界面
 
-   Open your browser and visit: `http://localhost:5101`
+打开浏览器访问: `http://localhost:5101`
 
 ---
 
-## 📖 Usage
+## 📖 使用示例
 
-### 1. Claude Code Direct Mode
+### 1. Claude Code 直连模式
 
-**Endpoint**: `POST /v1/messages`
+**端点**: `POST /v1/messages`
 
-**Example** (Python):
+**示例** (Python):
 ```python
 import httpx
 
@@ -97,7 +86,7 @@ data = {
     "messages": [
         {
             "role": "user",
-            "content": [{"type": "text", "text": "Hello!"}]
+            "content": [{"type": "text", "text": "你好！"}]
         }
     ],
     "stream": True
@@ -109,11 +98,11 @@ with httpx.Client() as client:
             print(line)
 ```
 
-### 2. Codex CLI Direct Mode
+### 2. Codex CLI 直连模式
 
-**Endpoint**: `POST /openai/responses`
+**端点**: `POST /openai/responses`
 
-**Example** (Python):
+**示例** (Python):
 ```python
 import httpx
 
@@ -124,7 +113,7 @@ data = {
         {
             "type": "message",
             "role": "user",
-            "content": [{"type": "input_text", "text": "Analyze this code"}]
+            "content": [{"type": "input_text", "text": "分析这段代码"}]
         }
     ],
     "stream": True
@@ -141,11 +130,11 @@ with httpx.Client() as client:
             print(line)
 ```
 
-### 3. OpenAI Format Conversion Mode
+### 3. OpenAI 格式转换模式
 
-**Endpoint**: `POST /v1/chat/completions`
+**端点**: `POST /v1/chat/completions`
 
-**Example** (Python):
+**示例** (Python):
 ```python
 from openai import OpenAI
 
@@ -155,10 +144,10 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="gpt-4",  # Auto-converted to Claude model
+    model="gpt-4",  # 自动转换为 Claude 模型
     messages=[
-        {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": "Hello!"}
+        {"role": "system", "content": "你是一个编程助手"},
+        {"role": "user", "content": "你好！"}
     ],
     stream=True
 )
@@ -170,23 +159,23 @@ for chunk in response:
 
 ---
 
-## 🎯 Configuration
+## 🎯 主要功能
 
-### Web Dashboard
+### Web 管理后台
 
-Access `http://localhost:5101` to manage:
+访问 `http://localhost:5101` 可以管理：
 
-- **API Configs**: Claude and Codex API keys, priorities, time-based activation
-- **OpenAI Conversion**: Dedicated configs for OpenAI format conversion
-- **Retry Strategies**: Configure multiple retry strategies with different timeouts
-- **Model Conversions**: Auto-convert model names (e.g., gpt-4 → claude-sonnet-4)
-- **Error Handling**: Configure HTTP status code handling strategies
-- **Timeout Settings**: Connection, read, write timeouts for different scenarios
-- **Token Statistics**: Real-time token usage charts and reports
+- **API 配置**: 添加/编辑/删除 Claude 和 Codex API 密钥
+- **OpenAI 转换配置**: 专用的 OpenAI 格式转换配置
+- **重试策略**: 配置多个重试策略和超时时间
+- **模型转换**: 自动转换模型名称（如 gpt-4 → claude-sonnet-4）
+- **错误处理**: 配置不同 HTTP 状态码的处理策略
+- **超时设置**: 连接、读取、写入超时配置
+- **Token 统计**: 实时查看 Token 使用量和图表
 
-### Configuration File
+### 配置文件
 
-All settings are stored in `json_data/all_configs.json`:
+所有配置保存在 `json_data/all_configs.json`：
 
 ```json
 {
@@ -202,85 +191,87 @@ All settings are stored in `json_data/all_configs.json`:
 
 ---
 
-## 🔧 Architecture
+## 🔧 技术架构
 
-### Tech Stack
+### 技术栈
 
-- **Framework**: FastAPI (async web framework)
-- **HTTP Client**: httpx (async HTTP)
-- **Config Management**: JSON file-based
-- **Logging**: Python logging module
-- **Statistics**: Custom token tracking module
+- **框架**: FastAPI (异步 Web 框架)
+- **HTTP 客户端**: httpx (异步 HTTP)
+- **配置管理**: 基于 JSON 文件
+- **日志**: Python logging 模块
+- **统计**: 自定义 Token 追踪模块
 
-### Core Modules
+### 核心模块
 
-1. **app.py** - FastAPI application, API routing, reverse proxy, failover logic
-2. **config_manager.py** - Unified configuration management, JSON persistence
-3. **openai_adapter.py** - OpenAI→Claude format conversion, thinking mode support
-4. **openai_to_codex.py** - OpenAI→Codex format conversion, full Codex protocol
-5. **token_stats.py** - Token usage tracking, real-time aggregation
+1. **app.py** - FastAPI 应用、API 路由、反向代理、故障转移逻辑
+2. **config_manager.py** - 统一配置管理、JSON 持久化
+3. **openai_adapter.py** - OpenAI→Claude 格式转换、思考模式支持
+4. **openai_to_codex.py** - OpenAI→Codex 格式转换、完整 Codex 协议
+5. **token_stats.py** - Token 使用追踪、实时聚合
 
-### Data Flow
+### 数据流
 
 ```
-Client Request
+客户端请求
   ↓
-Path Recognition (/v1/messages | /v1/chat/completions | /openai/responses)
+路径识别 (/v1/messages | /v1/chat/completions | /openai/responses)
   ↓
-Format Conversion (OpenAI→Claude | OpenAI→Codex | Direct)
+格式转换 (OpenAI→Claude | OpenAI→Codex | 直接透传)
   ↓
-API Selection (Primary → Backup → Retry Strategy)
+API选择 (主API → 备用API → 重试策略)
   ↓
-Request Forwarding (Streaming/Non-streaming)
+请求转发 (流式/非流式)
   ↓
-Error Handling (Detect → Record → Switch/Retry)
+错误处理 (检测 → 记录 → 切换/重试)
   ↓
-Response Conversion (Claude→OpenAI | Codex→OpenAI | Direct)
+响应转换 (Claude→OpenAI | Codex→OpenAI | 直接透传)
   ↓
-Token Statistics (Extract usage → Record → Aggregate)
+Token统计 (提取usage → 记录 → 聚合)
   ↓
-Return to Client
+返回客户端
 ```
 
 ---
 
-## 📝 Documentation
+## 📝 文档
 
-For detailed documentation in Chinese, see [使用说明.md](./使用说明.md).
+完整的中文使用文档请参考 [使用说明.md](./使用说明.md)。
 
-Topics covered:
-- Client configuration (Claude Code CLI, Codex CLI, Python SDK)
-- Advanced API management
-- Smart failover mechanisms
-- Token statistics and monitoring
-- Troubleshooting FAQ
-- Maintenance and operations
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+**文档涵盖内容**：
+- 客户端配置（Claude Code CLI、Codex CLI、Python SDK）
+- 高级 API 管理
+- 智能故障转移机制
+- Token 统计和监控
+- 故障排查 FAQ
+- 维护和运维指南
 
 ---
 
-## 📄 License
+## 🤝 贡献
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+欢迎提交 Issue 和 Pull Request！
+
+查看 [贡献指南](CONTRIBUTING.md) 了解详细信息。
 
 ---
 
-## 🙏 Acknowledgments
+## 📄 许可证
+
+本项目采用 [MIT 许可证](LICENSE)。
+
+---
+
+## 🙏 致谢
 
 - [Anthropic](https://www.anthropic.com/) - Claude API
 - [OpenAI](https://openai.com/) - Codex CLI
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern web framework
-- [httpx](https://www.python-httpx.org/) - HTTP client library
+- [FastAPI](https://fastapi.tiangolo.com/) - 现代 Web 框架
+- [httpx](https://www.python-httpx.org/) - HTTP 客户端库
 
 ---
 
-**Version**: 1.0
-**Port**: 5101
-**Repository**: https://github.com/cd555yong/codex_cc_switch
+**版本**: 1.0
+**端口**: 5101
+**仓库**: https://github.com/cd555yong/codex_cc_switch
 
-🚀 Generated with [Claude Code](https://claude.com/claude-code)
+🚀 使用 [Claude Code](https://claude.com/claude-code) 生成

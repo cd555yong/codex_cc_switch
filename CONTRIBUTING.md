@@ -2,6 +2,10 @@
 
 First off, thank you for considering contributing to this project! 🎉
 
+**English** | [简体中文](./CONTRIBUTING_CN.md)
+
+---
+
 ## 🤝 How to Contribute
 
 ### Reporting Bugs
