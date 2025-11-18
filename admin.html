@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YASHU - Claude/Codex API中转</title>
+    <script src="chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { color: #333; margin-bottom: 20px; text-align: center; }
+
+        /* 标题布局样式 */
+        .header-title { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; padding: 15px 0; border-bottom: 3px solid #1E90FF; }
+        .logo { font-size: 28px; font-weight: bold; color: #1E90FF; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .logo-dot { width: 14px; height: 14px; background: #28a745; border-radius: 50%; }
+        .header-title h1 { flex: 1; text-align: center; font-size: 22px; margin: 0; color: #333; }
+
+        /* 标签页样式 */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab { padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 14px; color: #666; transition: all 0.3s; border-bottom: 3px solid transparent; }
+        .tab.active { color: #007bff; border-bottom-color: #007bff; font-weight: bold; }
+        .tab:hover { color: #0056b3; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; transition: all 0.3s; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-warning:hover { background: #e0a800; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; margin: 0 2px; }
+        .configs-list { background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .config-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .config-item:last-child { border-bottom: none; }
+        .config-item.disabled { background: #f8f9fa; opacity: 0.6; }
+        .config-info { flex: 1; }
+        .config-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .config-url { color: #666; font-size: 14px; margin-bottom: 3px; }
+        .config-key { color: #999; font-size: 12px; font-family: monospace; }
+        .priority-tag { display: inline-block; padding: 2px 6px; margin-right: 8px; border-radius: 12px; background: #f1f3f5; font-size: 12px; color: #444; }
+        .mono-chip { font-family: monospace; background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+        .config-type { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; margin-left: 10px; }
+        .type-primary { background: #007bff; color: white; }
+        .type-backup { background: #6c757d; color: white; }
+        .config-actions { display: flex; gap: 5px; align-items: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .modal-content { background: white; margin: 50px auto; padding: 30px; max-width: 500px; border-radius: 8px; }
+        .modal-title { font-size: 20px; margin-bottom: 20px; font-weight: bold; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .toast { position: fixed; top: 20px; right: 20px; background: #333; color: white; padding: 15px 20px; border-radius: 5px; z-index: 2000; display: none; }
+        .toast.success { background: #28a745; }
+        .toast.error { background: #dc3545; }
+        
+        /* 优化的开关样式 */
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 24px; box-shadow: inset 0 0 5px rgba(0,0,0,0.1); }
+        .switch .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .switch input:checked + .slider { background-color: #28a745; }
+        .switch input:checked + .slider:before { transform: translateX(26px); }
+        .switch input:focus + .slider { box-shadow: 0 0 1px #28a745; }
+
+        /* 自动保存提示 */
+        .auto-save-indicator { position: fixed; top: 20px; right: 20px; background: #28a745; color: white; padding: 10px 20px; border-radius: 5px; z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .auto-save-indicator.show { display: block; opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-title">
+            <div class="logo">
+                YASHU <span class="logo-dot"></span>
+            </div>
+            <h1>Claude code/Codex API 中转统一配置管理</h1>
+        </div>
+        
+        <!-- 标签页 -->
+        <div class="tabs">
+            <button class="tab active" data-tab="api" onclick="switchTab(event, 'api')">Claude配置</button>
+            <button class="tab" data-tab="codex" onclick="switchTab(event, 'codex')">Codex配置</button>
+            <button class="tab" data-tab="openai-claude" onclick="switchTab(event, 'openai-claude')">OpenAI转Claude</button>
+            <button class="tab" data-tab="retry" onclick="switchTab(event, 'retry')">超时重试</button>
+            <button class="tab" data-tab="model-conversion" onclick="switchTab(event, 'model-conversion')">🔄 模型转换</button>
+            <button class="tab" data-tab="timeout" onclick="switchTab(event, 'timeout')">⏱ 超时设置</button>
+            <button class="tab" data-tab="error-strategies" onclick="switchTab(event, 'error-strategies')">⚠️ 错误策略</button>
+            <button class="tab" data-tab="token-stats" onclick="switchTab(event, 'token-stats')">📊 Token统计</button>
+        </div>
+        
+        <div class="header">
+            <div>
+                <button class="btn btn-primary" id="addBtn" onclick="openAddModal()">➕ 添加</button>
+                <button class="btn btn-secondary" onclick="loadConfigs()">🔄 刷新</button>
+                <button class="btn btn-secondary" id="resetCooldownBtn" onclick="resetCooldown()" style="display: none;">🔄 重置冷却</button>
+            </div>
+        </div>
+        <div id="configsList" class="configs-list"></div>
+    </div>
+
+    <!-- 自动保存提示 -->
+    <div id="autoSaveIndicator" class="auto-save-indicator">✅ 已自动保存</div>
+
+    <!-- 添加/编辑模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="modalTitle">编辑配置</h2>
+            <input type="hidden" id="editIndex">
+            <div class="form-group">
+                <label>名称</label>
+                <input type="text" id="editName">
+            </div>
+            <div class="form-group">
+                <label>API地址</label>
+                <input type="text" id="editUrl">
+            </div>
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="text" id="editKey">
+            </div>
+            <div class="form-group" id="typeGroup">
+                <label>类型</label>
+                <select id="editType">
+                    <option value="primary">主要API</option>
+                    <option value="backup">备用API</option>
+                </select>
+            </div>
+            <div class="form-group" id="timeEnabledGroup">
+                <label>时间使能（周一至周日）</label>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_mon" checked> 周一
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_tue" checked> 周二
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_wed" checked> 周三
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_thu" checked> 周四
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_fri" checked> 周五
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_sat" checked> 周六
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="checkbox" id="time_sun" checked> 周日
+                    </label>
+                </div>
+            </div>
+            <div class="form-group" id="activationGroup">
+                <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <input type="checkbox" id="editActivationEnabled">
+                    <span>启用定时激活（每天固定时间发送激活请求）</span>
+                </label>
+                <div style="margin-top: 10px;">
+                    <label>激活时间（格式：HH:MM）</label>
+                    <input type="time" id="editActivationTime" value="08:00" style="width: 150px;">
+                </div>
+                <div style="font-size: 12px; color: #666; margin-top: 8px; padding: 8px; background: #f8f9fa; border-radius: 4px;">
+                    💡 <strong>说明：</strong>某些API Key需要在特定时间激活才能开始计时。启用后，系统会在设定时间自动发送测试请求激活该Key。如失败，每1分钟重试一次，最多20次。
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button class="btn btn-success" onclick="saveConfig()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let currentTab = 'api';
+        let currentConfigs = [];
+        let tokenStatsAutoRefreshTimer = null;  // 自动刷新定时器
+        let lastTokenStatsData = null;  // 上一次的统计数据（用于比较变化）
+
+        function switchTab(evt, tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            const targetButton = evt?.currentTarget || evt?.target || document.querySelector(`.tab[data-tab="${tab}"]`);
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+            
+            // 根据标签类型显示/隐藏添加按钮
+            const addBtn = document.getElementById('addBtn');
+            if (tab === 'timeout' || tab === 'error-strategies' || tab === 'token-stats') {
+                addBtn.style.display = 'none';
+            } else {
+                addBtn.style.display = 'inline-block';
+            }
+            
+            // 根据标签类型显示/隐藏重置冷却按钮
+            const resetCooldownBtn = document.getElementById('resetCooldownBtn');
+            if (tab === 'api' || tab === 'codex') {
+                resetCooldownBtn.style.display = 'inline-block';
+            } else {
+                resetCooldownBtn.style.display = 'none';
+            }
+
+            // 控制Token统计自动刷新
+            if (tab === 'token-stats') {
+                // 切换到Token统计标签，启动自动刷新
+                startTokenStatsAutoRefresh();
+            } else {
+                // 切换离开Token统计标签，停止自动刷新
+                stopTokenStatsAutoRefresh();
+            }
+
+            loadConfigs();
+        }
+
+        async function loadConfigs() {
+            try {
+                // 先调用reload端点，重新加载配置文件
+                try {
+                    await fetch('/api/reload', { method: 'POST' });
+                } catch (reloadError) {
+                    console.warn('重新加载配置失败:', reloadError);
+                    // 继续执行，即使reload失败也能读取缓存的配置
+                }
+                
+                let endpoint = '/api/configs';
+                if (currentTab === 'codex') endpoint = '/api/codex';
+                else if (currentTab === 'openai-claude') endpoint = '/api/openai-to-claude';
+                else if (currentTab === 'retry') endpoint = '/api/retry';
+                else if (currentTab === 'model-conversion') endpoint = '/api/model-conversion';
+                else if (currentTab === 'timeout') endpoint = '/api/timeout';
+                else if (currentTab === 'error-strategies') endpoint = '/api/error-strategies';
+                else if (currentTab === 'token-stats') endpoint = '/api/token-stats';
+                
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                
+                if (currentTab === 'openai-claude') {
+                    currentConfigs = data.configs || [];
+                    renderOpenaiClaude(currentConfigs);
+                } else if (currentTab === 'timeout') {
+                    // 加载优化设置并合并到超时设置中
+                    try {
+                        const optResponse = await fetch('/api/optimization');
+                        const optData = await optResponse.json();
+                        const mergedSettings = { ...data.settings, ...optData.settings };
+                        renderTimeoutSettings(mergedSettings);
+                    } catch (error) {
+                        console.warn('加载优化设置失败，使用默认值:', error);
+                        renderTimeoutSettings(data.settings);
+                    }
+                } else if (currentTab === 'error-strategies') {
+                    renderErrorStrategies(data.strategies);
+                } else if (currentTab === 'model-conversion') {
+                    currentConfigs = data.configs || [];
+                    renderModelConversions(currentConfigs);
+                } else if (currentTab === 'token-stats') {
+                    lastTokenStatsData = data;  // 保存数据用于后续比较
+                    renderTokenStats(data);
+                } else {
+                    currentConfigs = data.configs || [];
+                    renderConfigs(currentConfigs);
+                }
+            } catch (error) {
+                showToast('加载配置失败: ' + error.message, 'error');
+            }
+        }
+
+        // ========== Token统计自动刷新功能 ==========
+
+        // 启动Token统计自动刷新
+        function startTokenStatsAutoRefresh() {
+            // 清除已存在的定时器
+            stopTokenStatsAutoRefresh();
+
+            // 创建新的定时器，每秒检查一次
+            tokenStatsAutoRefreshTimer = setInterval(async () => {
+                await checkAndRefreshTokenStats();
+            }, 1000);  // 1秒间隔
+        }
+
+        // 停止Token统计自动刷新
+        function stopTokenStatsAutoRefresh() {
+            if (tokenStatsAutoRefreshTimer) {
+                clearInterval(tokenStatsAutoRefreshTimer);
+                tokenStatsAutoRefreshTimer = null;
+            }
+        }
+
+        // 检查并刷新Token统计数据
+        async function checkAndRefreshTokenStats() {
+            try {
+                // 获取最新的统计数据
+                const response = await fetch('/api/token-stats');
+                const newData = await response.json();
+
+                // 将数据转换为字符串以便比较
+                const newDataStr = JSON.stringify(newData);
+                const lastDataStr = lastTokenStatsData ? JSON.stringify(lastTokenStatsData) : null;
+
+                // 如果数据有变化，则更新界面
+                if (newDataStr !== lastDataStr) {
+                    lastTokenStatsData = newData;
+                    renderTokenStats(newData);
+                }
+            } catch (error) {
+                console.error('自动刷新Token统计失败:', error);
+            }
+        }
+
+        function renderOpenaiClaude(configs) {
+            const list = document.getElementById('configsList');
+            if (!configs || configs.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无OpenAI转Claude配置，请添加</div>';
+                return;
+            }
+            list.innerHTML = configs.map((cfg, index) => {
+                const isEnabled = cfg.enabled !== false;
+                const displayName = cfg.name || `OpenAI转Claude-${index + 1}`;
+                const priorityBadge = `<span class="priority-tag" title="优先级越靠前越优先">#${index + 1}</span>`;
+                const statusColor = isEnabled ? '#28a745' : '#dc3545';
+                const statusLabel = isEnabled ? '✓ 已启用' : '✗ 已禁用';
+                const keyPreview = cfg.key ? `${cfg.key.substring(0, 20)}...` : '未设置';
+                const topDisabled = index === 0 ? 'disabled' : '';
+                const bottomDisabled = index === configs.length - 1 ? 'disabled' : '';
+                return `
+                <div class="config-item ${isEnabled ? '' : 'disabled'}">
+                    <div class="config-info">
+                        <div class="config-name">
+                            ${priorityBadge}
+                            <span>${displayName}</span>
+                            <span style="margin-left: 10px; font-size: 12px; color: ${statusColor};">${statusLabel}</span>
+                        </div>
+                        <div class="config-url">🔗 ${cfg.base_url || '未设置'}</div>
+                        <div class="config-key">🔑 ${keyPreview}</div>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            说明：按列表顺序优先使用启用的配置，无自动切换。
+                        </div>
+                    </div>
+                    <div class="config-actions">
+                        <button class="btn ${isEnabled ? 'btn-warning' : 'btn-success'} btn-sm" title="切换启用状态" onclick="toggleConfig(${index})">
+                            ${isEnabled ? '禁用' : '启用'}
+                        </button>
+                        <button class="btn btn-primary btn-sm" title="编辑配置" onclick="openEditModal(${index})">编辑</button>
+                        <button class="btn btn-secondary btn-sm" title="上移一位" onclick="moveConfig(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-secondary btn-sm" title="下移一位" onclick="moveConfig(${index}, 'down')" ${index === configs.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置顶" onclick="moveConfig(${index}, 'top')" ${topDisabled}>⤒</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置底" onclick="moveConfig(${index}, 'bottom')" ${bottomDisabled}>⤓</button>
+                        <button class="btn btn-info btn-sm" title="复制一条相同配置" onclick="duplicateConfig(${index})">复制</button>
+                        <button class="btn btn-danger btn-sm" title="删除配置" onclick="deleteConfig(${index})">删除</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+
+        function renderConfigs(configs) {
+            const list = document.getElementById('configsList');
+            if (configs.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无配置，请添加</div>';
+                return;
+            }
+            const allowDuplicate = true;
+            const showScheduling = currentTab === 'api' || currentTab === 'codex';
+            list.innerHTML = configs.map((cfg, index) => {
+                const priorityBadge = `<span class="priority-tag" title="优先级越靠前越优先">#${index + 1}</span>`;
+                const typeBadge = showScheduling && cfg.type ? `<span class="config-type type-${cfg.type}">${cfg.type === 'primary' ? '主要' : '备用'}</span>` : '';
+                const statusColor = cfg.enabled !== false ? '#28a745' : '#dc3545';
+                const statusLabel = cfg.enabled !== false ? '✓ 已启用' : '✗ 已禁用';
+                const keyPreview = cfg.key ? `${cfg.key.substring(0, 20)}...` : '未配置';
+                const weekDays = ['一', '二', '三', '四', '五', '六', '日'];
+                const timeInfo = showScheduling && Array.isArray(cfg.time_enabled)
+                    ? '⏰ 可用时间: ' + weekDays.map((day, i) => cfg.time_enabled[i] ? `<span style="color: #28a745;">周${day}</span>` : `<span style="color: #ccc; text-decoration: line-through;">周${day}</span>`).join(' ')
+                    : '';
+                const activationInfo = showScheduling && cfg.activation_enabled
+                    ? `<span style="color: #007bff;">🔔 定时激活: ${cfg.activation_time}</span>`
+                    : '';
+                const topDisabled = index === 0 ? 'disabled' : '';
+                const bottomDisabled = index === configs.length - 1 ? 'disabled' : '';
+                const duplicateButton = allowDuplicate ? `<button class="btn btn-info btn-sm" title="复制一条相同配置" onclick="duplicateConfig(${index})">复制</button>` : '';
+                return `
+                <div class="config-item ${cfg.enabled === false ? 'disabled' : ''}">
+                    <div class="config-info">
+                        <div class="config-name">
+                            ${priorityBadge}
+                            <span>${cfg.name}</span>
+                            ${typeBadge}
+                            <span style="margin-left: 10px; font-size: 12px; color: ${statusColor}">${statusLabel}</span>
+                        </div>
+                        <div class="config-url">🔗 ${cfg.base_url || '未配置'}</div>
+                        <div class="config-key">🔑 ${keyPreview}</div>
+                        ${timeInfo ? `<div class="config-time" style="font-size: 12px; color: #666; margin-top: 5px;">${timeInfo}</div>` : ''}
+                        ${activationInfo ? `<div class="config-activation" style="font-size: 12px; margin-top: 5px;">${activationInfo}</div>` : ''}
+                    </div>
+                    <div class="config-actions">
+                        <button class="btn ${cfg.enabled !== false ? 'btn-warning' : 'btn-success'} btn-sm" title="切换启用状态" onclick="toggleConfig(${index})">
+                            ${cfg.enabled !== false ? '禁用' : '启用'}
+                        </button>
+                        <button class="btn btn-primary btn-sm" title="编辑配置" onclick="openEditModal(${index})">编辑</button>
+                        <button class="btn btn-secondary btn-sm" title="上移一位" onclick="moveConfig(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-secondary btn-sm" title="下移一位" onclick="moveConfig(${index}, 'down')" ${index === configs.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置顶" onclick="moveConfig(${index}, 'top')" ${topDisabled}>⤒</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置底" onclick="moveConfig(${index}, 'bottom')" ${bottomDisabled}>⤓</button>
+                        ${duplicateButton}
+                        <button class="btn btn-danger btn-sm" title="删除配置" onclick="deleteConfig(${index})">删除</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        function renderModelConversions(configs) {
+            const list = document.getElementById('configsList');
+            if (configs.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无模型转换配置，请添加</div>';
+                return;
+            }
+            list.innerHTML = configs.map((cfg, index) => {
+                const priorityBadge = `<span class="priority-tag" title="优先级越靠前越优先">#${index + 1}</span>`;
+                const statusColor = cfg.enabled !== false ? '#28a745' : '#dc3545';
+                const statusLabel = cfg.enabled !== false ? '✓ 已启用' : '✗ 已禁用';
+                const conversionType = cfg.conversion_type || 'simple_rename';
+                const conversionTypeLabel = conversionType === 'full_format' ? '完整格式转换' : '简单模型名替换';
+                const conversionTypeColor = conversionType === 'full_format' ? '#ff6b6b' : '#4ecdc4';
+                const topDisabled = index === 0 ? 'disabled' : '';
+                const bottomDisabled = index === configs.length - 1 ? 'disabled' : '';
+                return `
+                <div class="config-item ${cfg.enabled === false ? 'disabled' : ''}">
+                    <div class="config-info">
+                        <div class="config-name">
+                            ${priorityBadge}
+                            <span>${cfg.name}</span>
+                            <span style="margin-left: 10px; font-size: 12px; color: ${statusColor}">${statusLabel}</span>
+                        </div>
+                        <div class="config-url" style="color: #333;">📥 源模型: <span class="mono-chip">${cfg.source_model}</span></div>
+                        <div class="config-key" style="color: #333;">📤 目标模型: <span class="mono-chip">${cfg.target_model}</span></div>
+                        <div style="color: ${conversionTypeColor}; font-size: 12px; margin-top: 5px;">🔧 转换类型: ${conversionTypeLabel}</div>
+                    </div>
+                    <div class="config-actions">
+                        <button class="btn ${cfg.enabled !== false ? 'btn-warning' : 'btn-success'} btn-sm" title="切换启用状态" onclick="toggleConfig(${index})">
+                            ${cfg.enabled !== false ? '禁用' : '启用'}
+                        </button>
+                        <button class="btn btn-primary btn-sm" title="编辑配置" onclick="openEditModal(${index})">编辑</button>
+                        <button class="btn btn-secondary btn-sm" title="上移一位" onclick="moveConfig(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="btn btn-secondary btn-sm" title="下移一位" onclick="moveConfig(${index}, 'down')" ${index === configs.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置顶" onclick="moveConfig(${index}, 'top')" ${topDisabled}>⤒</button>
+                        <button class="btn btn-secondary btn-sm" title="快速置底" onclick="moveConfig(${index}, 'bottom')" ${bottomDisabled}>⤓</button>
+                        <button class="btn btn-info btn-sm" title="复制一条相同配置" onclick="duplicateConfig(${index})">复制</button>
+                        <button class="btn btn-danger btn-sm" title="删除配置" onclick="deleteConfig(${index})">删除</button>
+                    </div>
+                </div>
+            `;
+            }).join('');
+        }
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '添加配置';
+            document.getElementById('editIndex').value = '-1';
+            document.getElementById('editName').value = '';
+            
+            // 移除之前可能添加的模型转换字段
+            const sourceModelGroup = document.getElementById('sourceModelGroup');
+            const targetModelGroup = document.getElementById('targetModelGroup');
+            if (sourceModelGroup) sourceModelGroup.remove();
+            if (targetModelGroup) targetModelGroup.remove();
+            
+            if (currentTab === 'model-conversion') {
+                // 模型转换配置：隐藏URL和Key字段，添加源/目标模型字段
+                document.getElementById('editUrl').parentElement.style.display = 'none';
+                document.getElementById('editKey').parentElement.style.display = 'none';
+                
+                const urlGroup = document.getElementById('editUrl').parentElement;
+                const keyGroup = document.getElementById('editKey').parentElement;
+                
+                const sourceModelGroup = document.createElement('div');
+                sourceModelGroup.className = 'form-group';
+                sourceModelGroup.id = 'sourceModelGroup';
+                sourceModelGroup.innerHTML = '<label>源模型</label><input type="text" id="editSourceModel">';
+                urlGroup.parentElement.insertBefore(sourceModelGroup, urlGroup);
+                
+                const targetModelGroup = document.createElement('div');
+                targetModelGroup.className = 'form-group';
+                targetModelGroup.id = 'targetModelGroup';
+                targetModelGroup.innerHTML = '<label>目标模型</label><input type="text" id="editTargetModel">';
+                keyGroup.parentElement.insertBefore(targetModelGroup, keyGroup);
+                
+                const conversionTypeGroup = document.createElement('div');
+                conversionTypeGroup.className = 'form-group';
+                conversionTypeGroup.id = 'conversionTypeGroup';
+                conversionTypeGroup.innerHTML = `
+                    <label>转换类型</label>
+                    <select id="editConversionType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                        <option value="simple_rename">简单模型名替换（只改模型名，保持所有参数）</option>
+                        <option value="full_format">完整格式转换（转换messages/system格式）</option>
+                    </select>
+                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                        💡 提示：<br>
+                        • 简单替换：适合同版本模型升级（如旧Sonnet 4→新版）<br>
+                        • 完整转换：适合跨版本API格式升级（如Haiku 3.5→Sonnet 4）
+                    </div>
+                `;
+                const nameGroup = document.getElementById('editName').parentElement;
+                nameGroup.parentElement.insertBefore(conversionTypeGroup, nameGroup.nextSibling);
+                
+                document.getElementById('editSourceModel').value = '';
+                document.getElementById('editTargetModel').value = '';
+                document.getElementById('editConversionType').value = 'simple_rename';
+            } else {
+                // 非模型转换配置：显示URL和Key字段
+                document.getElementById('editUrl').parentElement.style.display = 'block';
+                document.getElementById('editKey').parentElement.style.display = 'block';
+                document.getElementById('editUrl').value = '';
+                document.getElementById('editKey').value = '';
+            }
+            
+            document.getElementById('editType').value = 'primary';
+            
+            if (currentTab === 'api' || currentTab === 'codex') {
+                document.getElementById('typeGroup').style.display = 'block';
+                document.getElementById('timeEnabledGroup').style.display = 'block';
+                document.getElementById('activationGroup').style.display = 'block';
+                // 默认全部选中
+                ['time_mon', 'time_tue', 'time_wed', 'time_thu', 'time_fri', 'time_sat', 'time_sun'].forEach(id => {
+                    document.getElementById(id).checked = true;
+                });
+                // 默认不启用定时激活
+                document.getElementById('editActivationEnabled').checked = false;
+                document.getElementById('editActivationTime').value = '08:00';
+            } else {
+                document.getElementById('typeGroup').style.display = 'none';
+                document.getElementById('timeEnabledGroup').style.display = 'none';
+                document.getElementById('activationGroup').style.display = 'none';
+            }
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function openEditModal(index) {
+            const cfg = currentConfigs[index];
+            document.getElementById('modalTitle').textContent = '编辑配置';
+            document.getElementById('editIndex').value = index;
+            document.getElementById('editName').value = cfg.name || '';
+            
+            // 先移除之前可能添加的模型转换字段
+            const oldSourceModelGroup = document.getElementById('sourceModelGroup');
+            const oldTargetModelGroup = document.getElementById('targetModelGroup');
+            if (oldSourceModelGroup) oldSourceModelGroup.remove();
+            if (oldTargetModelGroup) oldTargetModelGroup.remove();
+            
+            if (currentTab === 'model-conversion') {
+                // 模型转换配置：隐藏URL和Key字段，显示源/目标模型字段
+                const urlGroup = document.getElementById('editUrl').parentElement;
+                const keyGroup = document.getElementById('editKey').parentElement;
+                urlGroup.style.display = 'none';
+                keyGroup.style.display = 'none';
+                
+                const sourceModelGroup = document.createElement('div');
+                sourceModelGroup.className = 'form-group';
+                sourceModelGroup.id = 'sourceModelGroup';
+                sourceModelGroup.innerHTML = '<label>源模型</label><input type="text" id="editSourceModel">';
+                urlGroup.parentElement.insertBefore(sourceModelGroup, urlGroup);
+                
+                const targetModelGroup = document.createElement('div');
+                targetModelGroup.className = 'form-group';
+                targetModelGroup.id = 'targetModelGroup';
+                targetModelGroup.innerHTML = '<label>目标模型</label><input type="text" id="editTargetModel">';
+                keyGroup.parentElement.insertBefore(targetModelGroup, keyGroup);
+                
+                // 添加转换类型选择框（如果不存在）
+                if (!document.getElementById('conversionTypeGroup')) {
+                    const conversionTypeGroup = document.createElement('div');
+                    conversionTypeGroup.className = 'form-group';
+                    conversionTypeGroup.id = 'conversionTypeGroup';
+                    conversionTypeGroup.innerHTML = `
+                        <label>转换类型</label>
+                        <select id="editConversionType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                            <option value="simple_rename">简单模型名替换（只改模型名，保持所有参数）</option>
+                            <option value="full_format">完整格式转换（转换messages/system格式）</option>
+                        </select>
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">
+                            💡 提示：<br>
+                            • 简单替换：适合同版本模型升级（如旧Sonnet 4→新版）<br>
+                            • 完整转换：适合跨版本API格式升级（如Haiku 3.5→Sonnet 4）
+                        </div>
+                    `;
+                    const nameGroup = document.getElementById('editName').parentElement;
+                    nameGroup.parentElement.insertBefore(conversionTypeGroup, nameGroup.nextSibling);
+                }
+                
+                document.getElementById('editSourceModel').value = cfg.source_model || '';
+                document.getElementById('editTargetModel').value = cfg.target_model || '';
+                document.getElementById('editConversionType').value = cfg.conversion_type || 'simple_rename';
+            } else {
+                // 非模型转换配置：显示URL和Key字段
+                document.getElementById('editUrl').parentElement.style.display = 'block';
+                document.getElementById('editKey').parentElement.style.display = 'block';
+                document.getElementById('editUrl').value = cfg.base_url || '';
+                document.getElementById('editKey').value = cfg.key || '';
+            }
+            
+            if (currentTab === 'api' || currentTab === 'codex') {
+                document.getElementById('editType').value = cfg.type || 'primary';
+                document.getElementById('typeGroup').style.display = 'block';
+                document.getElementById('timeEnabledGroup').style.display = 'block';
+                document.getElementById('activationGroup').style.display = 'block';
+                // 加载time_enabled状态
+                const timeEnabled = cfg.time_enabled || [1, 1, 1, 1, 1, 1, 1];
+                const timeIds = ['time_mon', 'time_tue', 'time_wed', 'time_thu', 'time_fri', 'time_sat', 'time_sun'];
+                timeIds.forEach((id, i) => {
+                    document.getElementById(id).checked = timeEnabled[i] === 1;
+                });
+                // 加载定时激活状态
+                document.getElementById('editActivationEnabled').checked = cfg.activation_enabled || false;
+                document.getElementById('editActivationTime').value = cfg.activation_time || '08:00';
+            } else {
+                document.getElementById('typeGroup').style.display = 'none';
+                document.getElementById('timeEnabledGroup').style.display = 'none';
+                document.getElementById('activationGroup').style.display = 'none';
+            }
+            
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveConfig() {
+            const index = document.getElementById('editIndex').value;
+            const config = {
+                name: document.getElementById('editName').value
+            };
+            
+            if (currentTab === 'model-conversion') {
+                // 模型转换配置：使用源模型和目标模型
+                config.source_model = document.getElementById('editSourceModel').value;
+                config.target_model = document.getElementById('editTargetModel').value;
+                config.conversion_type = document.getElementById('editConversionType').value;
+                
+                if (!config.source_model || !config.target_model) {
+                    showToast('请填写源模型和目标模型', 'error');
+                    return;
+                }
+            } else {
+                // 其他配置：使用URL和Key
+                config.base_url = document.getElementById('editUrl').value;
+                config.key = document.getElementById('editKey').value;
+                
+                if (!config.base_url || !config.key) {
+                    showToast('请填写API地址和Key', 'error');
+                    return;
+                }
+            }
+            
+            if (currentTab === 'api' || currentTab === 'codex') {
+                config.type = document.getElementById('editType').value;
+                // 读取time_enabled
+                const timeIds = ['time_mon', 'time_tue', 'time_wed', 'time_thu', 'time_fri', 'time_sat', 'time_sun'];
+                config.time_enabled = timeIds.map(id => document.getElementById(id).checked ? 1 : 0);
+                // 读取定时激活设置
+                config.activation_enabled = document.getElementById('editActivationEnabled').checked;
+                config.activation_time = document.getElementById('editActivationTime').value;
+            }
+
+            try {
+                let endpoint = '/api/configs';
+                let method = 'POST';
+                
+                if (currentTab === 'codex') {
+                    endpoint = '/api/codex';
+                    if (index !== '-1') {
+                        endpoint += `/${index}`;
+                        method = 'PUT';
+                    }
+                } else if (currentTab === 'openai-claude') {
+                    endpoint = '/api/openai-to-claude';
+                    if (index !== '-1') {
+                        endpoint += `/${index}`;
+                        method = 'PUT';
+                    }
+                } else if (currentTab === 'retry') {
+                    endpoint = '/api/retry';
+                    if (index !== '-1') {
+                        endpoint += `/${index}`;
+                        method = 'PUT';
+                    }
+                } else if (currentTab === 'model-conversion') {
+                    endpoint = '/api/model-conversion';
+                    if (index !== '-1') {
+                        endpoint += `/${index}`;
+                        method = 'PUT';
+                    }
+                } else if (currentTab === 'api') {
+                    if (index !== '-1') {
+                        endpoint += `/${index}`;
+                        method = 'PUT';
+                    }
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    closeEditModal();
+                    loadConfigs();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteConfig(index) {
+            if (!confirm('确定要删除这个配置吗?')) return;
+
+            try {
+                let endpoint;
+                if (currentTab === 'codex') {
+                    endpoint = `/api/codex/${index}`;
+                } else if (currentTab === 'openai-claude') {
+                    endpoint = `/api/openai-to-claude/${index}`;
+                } else if (currentTab === 'retry') {
+                    endpoint = `/api/retry/${index}`;
+                } else if (currentTab === 'model-conversion') {
+                    endpoint = `/api/model-conversion/${index}`;
+                } else {
+                    endpoint = `/api/configs/${index}`;
+                }
+                const response = await fetch(endpoint, { method: 'DELETE' });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadConfigs();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('删除失败: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleConfig(index) {
+            try {
+                let endpoint;
+                if (currentTab === 'codex') {
+                    endpoint = `/api/codex/${index}/toggle`;
+                } else if (currentTab === 'openai-claude') {
+                    endpoint = `/api/openai-to-claude/${index}/toggle`;
+                } else if (currentTab === 'retry') {
+                    endpoint = `/api/retry/${index}/toggle`;
+                } else if (currentTab === 'model-conversion') {
+                    endpoint = `/api/model-conversion/${index}/toggle`;
+                } else {
+                    endpoint = `/api/configs/${index}/toggle`;
+                }
+                const response = await fetch(endpoint, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadConfigs();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('切换失败: ' + error.message, 'error');
+            }
+        }
+
+        async function moveConfig(index, direction) {
+            try {
+                let endpoint;
+                if (currentTab === 'codex') {
+                    endpoint = `/api/codex/${index}/move`;
+                } else if (currentTab === 'openai-claude') {
+                    endpoint = `/api/openai-to-claude/${index}/move`;
+                } else if (currentTab === 'retry') {
+                    endpoint = `/api/retry/${index}/move`;
+                } else if (currentTab === 'model-conversion') {
+                    endpoint = `/api/model-conversion/${index}/move`;
+                } else {
+                    endpoint = `/api/configs/${index}/move`;
+                }
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ direction })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadConfigs();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('移动失败: ' + error.message, 'error');
+            }
+        }
+
+        async function duplicateConfig(index) {
+            try {
+                let endpoint;
+                if (currentTab === 'codex') {
+                    endpoint = `/api/codex/${index}/duplicate`;
+                } else if (currentTab === 'openai-claude') {
+                    endpoint = `/api/openai-to-claude/${index}/duplicate`;
+                } else if (currentTab === 'model-conversion') {
+                    endpoint = `/api/model-conversion/${index}/duplicate`;
+                } else if (currentTab === 'retry') {
+                    endpoint = `/api/retry/${index}/duplicate`;
+                } else {
+                    endpoint = `/api/configs/${index}/duplicate`;
+                }
+                const response = await fetch(endpoint, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadConfigs();
+                } else {
+                    showToast(data.message || '复制失败', 'error');
+                }
+            } catch (error) {
+                showToast('复制失败: ' + error.message, 'error');
+            }
+        }
+
+        async function resetCooldown() {
+            if (!confirm('确定要重置所有冷却状态吗？')) {
+                return;
+            }
+            
+            try {
+                let endpoint;
+                if (currentTab === 'api') {
+                    endpoint = '/api/reset-api-cooldown';
+                } else if (currentTab === 'codex') {
+                    endpoint = '/api/reset-codex-cooldown';
+                } else {
+                    showToast('当前标签页不支持重置冷却', 'error');
+                    return;
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadConfigs();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('重置冷却失败: ' + error.message, 'error');
+            }
+        }
+
+        function renderTimeoutSettings(settings) {
+            const list = document.getElementById('configsList');
+            
+            // 按功能分类的超时配置：通用、Claude、Codex
+            const timeoutCategories = [
+                {
+                    category: '通用HTTP超时设置',
+                    icon: '🌐',
+                    desc: '所有HTTP请求共用的基础超时参数（适用于Claude和Codex）',
+                    fields: [
+                        {key: 'connect_timeout', label: '普通连接超时', desc: '建立TCP连接的最长等待时间（从开始连接到连接成功）。所有请求的第一步都需要先建立连接。网络较慢时可能需要增加', default: 60},
+                        {key: 'write_timeout', label: '写入超时', desc: '向服务器写入请求数据的最长等待时间（上传阶段）。大请求体时可能需要增加。与读取超时分离，专门控制上传', default: 60},
+                        {key: 'pool_timeout', label: '连接池超时', desc: '从连接池获取可用连接的最长等待时间（等待池中有空闲连接）。高并发时池满可能需要等待，增大此值可提高并发容错', default: 120},
+                        {key: 'extended_connect_timeout', label: '扩展连接超时', desc: '重试和策略重试专用的连接超时（比普通连接超时更长）。失败后自动使用更长的连接时间，避免二次失败。与普通连接超时分离，专门优化重试成功率', default: 90}
+                    ]
+                },
+                {
+                    category: 'Claude API超时设置',
+                    icon: '💬',
+                    desc: 'Claude API请求的专用超时配置、重试策略、API切换和健康管理',
+                    fields: [
+                        {key: 'streaming_read_timeout', label: '流式读取超时', desc: 'Claude流式响应（打字机效果）的单次读取超时（等待下一个数据块）。流式输出较慢时可增加。与非流式读取分离，专门控制流式场景', default: 60},
+                        {key: 'non_streaming_read_timeout', label: '非流式读取超时', desc: 'Claude非流式响应（一次性全部返回）的读取超时（等待完整响应）。复杂任务耗时长时可增加。与流式读取分离，专门控制非流式场景', default: 60},
+                        {key: 'strategy_retry_read_timeout', label: '策略重试读取超时', desc: '策略重试节点（超时重试配置列表）的专用读取超时。触发400/404/429/500/502/503等错误时，依次尝试备用节点，每个节点用此超时。设置较大值（如200秒）可大幅提高容错能力。与普通读取超时分离，专门优化策略重试成功率', default: 200},
+                        {key: 'api_cooldown_seconds', label: 'API冷却时间', desc: 'API连续错误达到切换阈值后进入冷却状态的时长（自动暂停使用该KEY）。冷却期间自动切换到备用KEY，定时检测主KEY是否恢复。增大可避免频繁切换', default: 600},
+                        {key: 'api_error_threshold', label: 'API错误阈值', desc: '连续失败达到此次数时触发API切换并启动冷却流程。默认3次，可根据稳定性和容错需求调整', default: 3},
+                        {key: 'primary_api_check_interval', label: '主API检测间隔', desc: '使用备用API时，后台检测主API是否恢复的时间间隔（定时探测）。越短恢复越快，但会增加请求量。主API恢复后自动切回', default: 30},
+                        {key: 'health_check_interval', label: '健康检查间隔', desc: 'API健康检查守护线程的轮询间隔（定期向所有KEY发送测试请求）。设置为0可禁用健康检查。开启可提前发现KEY失效', default: 0.5},
+                        {key: 'stream_retry_wait', label: '流重试等待', desc: '流式响应中断后，重新发起请求前的等待时间（避免立即重试导致重复错误）。给服务端恢复时间，减少无意义重试', default: 1.0},
+                        {key: 'billing_cycle_delay', label: '计费周期延时', desc: '计费激活守护线程的启动延迟（服务启动后等待多久开始计费循环）。避免与服务初始化冲突', default: 60},
+                        {key: 'billing_send_interval', label: '计费发送间隔', desc: '计费激活消息发送之间的间隔（向多个KEY发送时的等待间隔）。避免瞬间大量请求触发限流', default: 1.0},
+                        {key: 'max_retries', label: '最大重试次数', desc: 'Claude请求的最大重试次数（switch_api策略使用）。每个请求在同一API上最多重试此次数，所有重试都失败后才记录一次错误。默认4次', default: 4}
+                    ]
+                },
+                {
+                    category: 'Codex专用超时设置',
+                    icon: '🤖',
+                    desc: 'Codex代码生成任务的自适应超时机制（针对代码生成的特殊需求）',
+                    fields: [
+                        {key: 'codex_connect_timeout', label: 'Codex连接超时', desc: 'Codex请求建立连接的专用超时（asyncio.wait_for控制初次连接）。与Claude的普通连接超时分离，Codex可单独调优', default: 30},
+                        {key: 'codex_base_timeout', label: 'Codex基础超时', desc: 'Codex流式请求的初始总超时（代码生成任务的起始等待时间）。自适应机制的基准值，超时后会自动增加', default: 60},
+                        {key: 'codex_timeout_increment', label: 'Codex超时增量', desc: 'Codex超时后每次自动增加的时间（累加到基础超时）。连续超时会累加此值，连续3次成功会重置。自适应优化Codex长任务容错', default: 60},
+                        {key: 'codex_error_threshold', label: 'Codex错误阈值', desc: 'Codex连续失败达到此次数时触发KEY切换并进入冷却。默认3次，可单独调优与主API阈值', default: 3}
+                    ],
+                },
+                {
+                    category: '高级重试设置',
+                    icon: '🔧',
+                    desc: '重试机制的高级配置选项（控制重试行为的细节）',
+                    fields: [
+                        {key: 'modify_retry_headers', label: '重试时修改请求头', desc: '控制重试请求的头信息处理方式。✅ 开启（推荐）：自动添加防缓存头和唯一标识，确保每次重试都是全新请求；⚪ 关闭：保持原始请求头不变，适用于对头信息敏感的特殊API', default: true, type: 'boolean'}
+                    ]
+                },
+                {
+                    category: '性能优化设置',
+                    icon: '⚡',
+                    desc: '优化API调用性能和响应速度的功能开关，可根据实际需求灵活启用',
+                    fields: [
+                        {key: 'enable_cache_control_limit', label: 'cache_control块数量限制', desc: '✅ 开启（推荐）：自动限制请求中的cache_control块数量不超过3个，防止Claude API返回400错误；⚪ 关闭：不限制cache_control块数量（可能导致超限时400错误）', default: true, type: 'boolean'}
+                    ]
+                }
+            ];
+            
+            let html = '<div style="padding: 20px;"><h3 style="margin-bottom: 20px;">⏱ 超时时间设置</h3>';
+            html += '<div style="margin-bottom: 20px; padding: 12px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px; font-size: 13px; color: #1565C0;">';
+            html += '💡 <strong>配置说明</strong>：超时设置影响请求的稳定性和响应速度。网络环境差时适当增加超时值，稳定环境可适当降低。扩展连接超时已优化为90秒，用于重试和策略重试。';
+            html += '</div>';
+            
+            timeoutCategories.forEach(category => {
+                html += `
+                    <div style="margin-bottom: 30px; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 15px; font-weight: bold;">
+                            ${category.icon} ${category.category}
+                        </div>
+                        <div style="padding: 15px; background: #fafafa;">
+                            <div style="font-size: 13px; color: #666; margin-bottom: 15px; padding: 8px; background: white; border-radius: 4px; border-left: 3px solid #667eea;">
+                                ${category.desc}
+                            </div>
+                            ${category.fields.map(field => {
+                                const value = settings[field.key] !== undefined ? settings[field.key] : field.default;
+                                
+                                // 布尔值字段渲染为开关
+                                if (field.type === 'boolean') {
+                                    const checked = value ? 'checked' : '';
+                                    const statusText = value ? '✅ 开启' : '⚪ 关闭';
+                                    const statusColor = value ? '#28a745' : '#6c757d';
+                                    return `
+                                        <div class="form-group" style="margin-bottom: 15px; background: white; padding: 12px; border-radius: 6px; border: 1px solid #e8e8e8;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                                <label style="font-weight: 500; color: #333;">${field.label}</label>
+                                                <div style="display: flex; align-items: center; gap: 10px;">
+                                                    <span id="status_${field.key}" style="font-size: 12px; color: ${statusColor}; font-weight: 500;">${statusText}</span>
+                                                    <label class="switch">
+                                                        <input type="checkbox" id="timeout_${field.key}" ${checked}
+                                                               onchange="handleAutoSave(this, '${field.key}')">
+                                                        <span class="slider"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                                                <span style="color: #2196F3;">ℹ️</span> ${field.desc}
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                                
+                                // 数组字段渲染为文本输入框
+                                if (field.type === 'array') {
+                                    const arrayValue = Array.isArray(value) ? value.join(',') : field.default.join(',');
+                                    return `
+                                        <div class="form-group" style="margin-bottom: 15px; background: white; padding: 12px; border-radius: 6px; border: 1px solid #e8e8e8;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                                <label style="font-weight: 500; color: #333;">${field.label}</label>
+                                                <span style="font-size: 11px; color: #999;">默认: ${field.default.join(',')}</span>
+                                            </div>
+                                            <input type="text" id="timeout_${field.key}" value="${arrayValue}"
+                                                   placeholder="用逗号分隔多个状态码，例如：400,404,429,500,502,503"
+                                                   style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;"
+                                                   onchange="handleAutoSave(this)">
+                                            <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                                                <span style="color: #2196F3;">ℹ️</span> ${field.desc}
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+
+                                // 数字字段渲染为输入框
+                                return `
+                                    <div class="form-group" style="margin-bottom: 15px; background: white; padding: 12px; border-radius: 6px; border: 1px solid #e8e8e8;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                            <label style="font-weight: 500; color: #333;">${field.label}</label>
+                                            <span style="font-size: 11px; color: #999;">默认: ${field.default}秒</span>
+                                        </div>
+                                        <input type="number" id="timeout_${field.key}" value="${value}" step="0.1" min="0"
+                                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 5px;"
+                                               onchange="handleAutoSave(this)">
+                                        <div style="font-size: 12px; color: #666; line-height: 1.4;">
+                                            <span style="color: #2196F3;">ℹ️</span> ${field.desc}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                <div class="form-actions" style="justify-content: flex-start; margin-top: 30px;">
+                    <button class="btn btn-secondary" onclick="loadConfigs()">🔄 重置为当前配置</button>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 5px; font-size: 13px; color: #1565C0; border-left: 4px solid #2196F3;">
+                    <strong>✨ 自动保存提示</strong><br>
+                    • 所有设置项修改后会<strong>自动保存</strong>，无需点击保存按钮<br>
+                    • 修改超时设置后会立即生效，无需重启服务<br>
+                    • 扩展连接超时（90秒）会自动用于重试和策略重试，提高成功率<br>
+                    • 建议先在测试环境验证配置，再应用到生产环境<br>
+                    • 如遇到频繁超时，优先检查网络连接和API服务状态
+                </div>
+            </div>`;
+            list.innerHTML = html;
+        }
+
+        // 自动保存处理函数
+        let autoSaveTimeout = null;
+        async function handleAutoSave(element, fieldKey) {
+            // 如果是布尔值，立即更新状态文本
+            if (element.type === 'checkbox' && fieldKey) {
+                const statusSpan = document.getElementById(`status_${fieldKey}`);
+                if (statusSpan) {
+                    statusSpan.textContent = element.checked ? '✅ 开启' : '⚪ 关闭';
+                    statusSpan.style.color = element.checked ? '#28a745' : '#6c757d';
+                }
+            }
+
+            // 延迟保存（防抖），避免频繁保存
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(async () => {
+                await saveTimeoutSettings(true); // true表示自动保存
+            }, 500); // 500ms后保存
+        }
+
+        // 显示自动保存提示
+        function showAutoSaveIndicator() {
+            const indicator = document.getElementById('autoSaveIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 2000); // 2秒后消失
+        }
+
+        async function saveTimeoutSettings(isAutoSave = false) {
+            try {
+                const settings = {
+                    connect_timeout: parseFloat(document.getElementById('timeout_connect_timeout').value),
+                    write_timeout: parseFloat(document.getElementById('timeout_write_timeout').value),
+                    pool_timeout: parseFloat(document.getElementById('timeout_pool_timeout').value),
+                    streaming_read_timeout: parseFloat(document.getElementById('timeout_streaming_read_timeout').value),
+                    non_streaming_read_timeout: parseFloat(document.getElementById('timeout_non_streaming_read_timeout').value),
+                    extended_connect_timeout: parseFloat(document.getElementById('timeout_extended_connect_timeout').value),
+                    api_cooldown_seconds: parseInt(document.getElementById('timeout_api_cooldown_seconds').value),
+                    api_error_threshold: parseInt(document.getElementById('timeout_api_error_threshold').value),
+                    codex_base_timeout: parseInt(document.getElementById('timeout_codex_base_timeout').value),
+                    codex_timeout_increment: parseInt(document.getElementById('timeout_codex_timeout_increment').value),
+                    codex_error_threshold: parseInt(document.getElementById('timeout_codex_error_threshold').value),
+                    codex_connect_timeout: parseFloat(document.getElementById('timeout_codex_connect_timeout').value),
+                    primary_api_check_interval: parseInt(document.getElementById('timeout_primary_api_check_interval').value),
+                    billing_cycle_delay: parseInt(document.getElementById('timeout_billing_cycle_delay').value),
+                    health_check_interval: parseFloat(document.getElementById('timeout_health_check_interval').value),
+                    billing_send_interval: parseFloat(document.getElementById('timeout_billing_send_interval').value),
+                    stream_retry_wait: parseFloat(document.getElementById('timeout_stream_retry_wait').value),
+                    strategy_retry_read_timeout: parseFloat(document.getElementById('timeout_strategy_retry_read_timeout').value),
+                    modify_retry_headers: document.getElementById('timeout_modify_retry_headers').checked,
+                    max_retries: parseInt(document.getElementById('timeout_max_retries').value)
+                };
+
+                // 优化设置（单独保存）
+                const optimizationSettings = {
+                    enable_cache_control_limit: document.getElementById('timeout_enable_cache_control_limit').checked
+                };
+
+                // 前端校验：检查数字字段的值是否有效（跳过布尔值字段）
+                for (const [key, value] of Object.entries(settings)) {
+                    if (key === 'modify_retry_headers') continue;
+                    if (isNaN(value) || value <= 0) {
+                        showToast(`配置项"${key}"的值无效，请输入大于0的数字`, 'error');
+                        return;
+                    }
+                }
+
+                const response = await fetch('/api/timeout', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    // 保存超时设置成功后，保存优化设置
+                    const optResponse = await fetch('/api/optimization', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(optimizationSettings)
+                    });
+                    const optData = await optResponse.json();
+                    if (optData.success) {
+                        // 根据是否为自动保存显示不同提示
+                        if (isAutoSave) {
+                            showAutoSaveIndicator();
+                        } else {
+                            showToast('所有设置已保存成功', 'success');
+                        }
+                    } else {
+                        showToast('超时设置已保存，但优化设置保存失败: ' + optData.message, 'error');
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        // ========== Token统计渲染 ==========
+        let currentTokenPeriod = 'today'; // 默认显示当天数据
+
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // ========== 模型价格映射表（每百万token的价格，单位：USD） ==========
+        const MODEL_PRICING = {
+                // Claude Haiku 模型
+                'claude-haiku-4-5-20251001': { input: 1.00, output: 5.00, cache_creation: 1.25, cache_read: 0.10 },
+                'claude-haiku-3-5-20240307': { input: 0.80, output: 4.00, cache_creation: 1.00, cache_read: 0.08 },
+                'claude-haiku-3-20240307': { input: 0.25, output: 1.25, cache_creation: 0.31, cache_read: 0.025 },
+
+                // Claude Sonnet 模型
+                'claude-sonnet-4-5-20250929': { input: 3.00, output: 15.00, cache_creation: 3.75, cache_read: 0.30 },
+                'claude-sonnet-4-20240229': { input: 3.00, output: 15.00, cache_creation: 3.75, cache_read: 0.30 },
+                'claude-sonnet-3-7-20250219': { input: 3.00, output: 15.00, cache_creation: 3.75, cache_read: 0.30 },
+                'claude-sonnet-3-5-20240620': { input: 3.00, output: 15.00, cache_creation: 3.75, cache_read: 0.30 },
+
+                // Claude Opus 模型
+                'claude-opus-4-1-20250514': { input: 15.00, output: 75.00, cache_creation: 18.75, cache_read: 1.50 },
+
+                // GPT Codex 模型 (90% cache discount - cache read is 10% of input price)
+                'gpt-5.1-codex': { input: 1.25, output: 10.00, cache_creation: 1.25, cache_read: 0.125 },
+                'gpt-5-codex': { input: 1.25, output: 10.00, cache_creation: 1.25, cache_read: 0.125 }
+        };
+
+        // 获取模型价格的辅助函数（支持模糊匹配）
+        function getModelPricing(modelName) {
+            // 1. 精确匹配
+            if (MODEL_PRICING[modelName]) {
+                return MODEL_PRICING[modelName];
+            }
+
+            // 2. 模糊匹配（通过模型名称关键词）
+            const lowerModel = modelName.toLowerCase();
+
+            // Claude Haiku 匹配
+            if (lowerModel.includes('haiku-4-5') || lowerModel.includes('haiku-4.5')) {
+                return MODEL_PRICING['claude-haiku-4-5-20251001'];
+            }
+            if (lowerModel.includes('haiku-3-5') || lowerModel.includes('haiku-3.5')) {
+                return MODEL_PRICING['claude-haiku-3-5-20240307'];
+            }
+            if (lowerModel.includes('haiku')) {
+                return MODEL_PRICING['claude-haiku-3-20240307'];
+            }
+
+            // Claude Sonnet 匹配
+            if (lowerModel.includes('sonnet-4-5') || lowerModel.includes('sonnet-4.5')) {
+                return MODEL_PRICING['claude-sonnet-4-5-20250929'];
+            }
+            if (lowerModel.includes('sonnet')) {
+                return MODEL_PRICING['claude-sonnet-4-20240229'];
+            }
+
+            // Claude Opus 匹配
+            if (lowerModel.includes('opus')) {
+                return MODEL_PRICING['claude-opus-4-1-20250514'];
+            }
+
+            // GPT Codex 匹配
+            if (lowerModel.includes('codex') || lowerModel.includes('gpt-5')) {
+                return MODEL_PRICING['gpt-5.1-codex'];
+            }
+
+            // 3. 默认返回 Sonnet 4.5 价格（最常用）
+            return MODEL_PRICING['claude-sonnet-4-5-20250929'];
+        }
+
+        // 计算单个模型的费用
+        function calculateModelCost(modelName, tokens) {
+            const pricing = getModelPricing(modelName);
+            const cost_usd = (
+                (tokens.input || 0) * pricing.input / 1000000 +
+                (tokens.output || 0) * pricing.output / 1000000 +
+                (tokens.cache_creation || 0) * pricing.cache_creation / 1000000 +
+                (tokens.cache_read || 0) * pricing.cache_read / 1000000
+            );
+            return {
+                usd: cost_usd,
+                cny: cost_usd * 7.2
+            };
+        }
+
+        // 根据时间范围过滤并计算统计数据（包含汇总和按模型分组）
+        function calculatePeriodSummary(statsData, period) {
+            const dailyData = statsData.daily || {};
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // 设置为当天00:00:00
+
+            // 计算开始日期
+            let startDate = new Date(today);
+            if (period === 'today') {
+                // 当天：从今天00:00:00开始
+                startDate = new Date(today);
+            } else if (period === '7days') {
+                // 7天：从6天前00:00:00开始(包括今天,共7天)
+                startDate.setDate(today.getDate() - 6);
+            } else if (period === '30days') {
+                // 30天：从29天前00:00:00开始(包括今天,共30天)
+                startDate.setDate(today.getDate() - 29);
+            }
+
+            // 初始化汇总数据
+            const summary = {
+                total_requests: 0,
+                total_tokens: 0,
+                total_input_tokens: 0,
+                total_output_tokens: 0,
+                total_cache_creation_tokens: 0,
+                total_cache_read_tokens: 0,
+                total_cost_usd: 0,
+                total_cost_cny: 0
+            };
+
+            // 初始化按模型分组的数据
+            const byModel = {};
+
+            // 遍历daily数据,过滤并累加符合时间范围的数据
+            Object.keys(dailyData).forEach(dateKey => {
+                const itemDate = new Date(dateKey + ' 00:00:00');
+                // 检查日期是否在范围内
+                if (itemDate >= startDate && itemDate <= today) {
+                    const dayData = dailyData[dateKey];
+
+                    // 累加汇总数据
+                    summary.total_requests += dayData.total_requests || 0;
+                    summary.total_tokens += dayData.total_tokens || 0;
+                    summary.total_input_tokens += dayData.total_input_tokens || 0;
+                    summary.total_output_tokens += dayData.total_output_tokens || 0;
+                    summary.total_cache_creation_tokens += dayData.total_cache_creation_tokens || 0;
+                    summary.total_cache_read_tokens += dayData.total_cache_read_tokens || 0;
+
+                    // 累加按模型分组的数据
+                    const models = dayData.models || {};
+                    Object.keys(models).forEach(modelName => {
+                        const count = models[modelName];
+                        if (!byModel[modelName]) {
+                            byModel[modelName] = {
+                                total_requests: 0,
+                                total_tokens: 0,
+                                total_input_tokens: 0,
+                                total_output_tokens: 0,
+                                total_cache_creation_tokens: 0,
+                                total_cache_read_tokens: 0
+                            };
+                        }
+                        byModel[modelName].total_requests += count;
+                        // 注意：daily数据中的models只记录了请求次数，没有详细的token数据
+                        // 所以我们需要从完整的统计数据中获取每个模型的token信息
+                    });
+                }
+            });
+
+            // 从完整的by_model数据中提取周期内的详细信息
+            // 这里我们需要根据模型在周期内的请求占比来估算token
+            const fullByModel = statsData.by_model || {};
+            Object.keys(byModel).forEach(modelName => {
+                if (fullByModel[modelName]) {
+                    const fullStats = fullByModel[modelName];
+                    const periodRequests = byModel[modelName].total_requests;
+                    const fullRequests = fullStats.total_requests || 1;
+                    const ratio = periodRequests / fullRequests;
+
+                    // 按比例分配token数据
+                    byModel[modelName].total_tokens = Math.round((fullStats.total_tokens || 0) * ratio);
+                    byModel[modelName].total_input_tokens = Math.round((fullStats.total_input_tokens || 0) * ratio);
+                    byModel[modelName].total_output_tokens = Math.round((fullStats.total_output_tokens || 0) * ratio);
+                    byModel[modelName].total_cache_creation_tokens = Math.round((fullStats.total_cache_creation_tokens || 0) * ratio);
+                    byModel[modelName].total_cache_read_tokens = Math.round((fullStats.total_cache_read_tokens || 0) * ratio);
+                }
+            });
+
+            // 计算总费用
+            let total_cost_usd = 0;
+            Object.entries(byModel).forEach(([model, stats]) => {
+                const cost = calculateModelCost(model, {
+                    input: stats.total_input_tokens,
+                    output: stats.total_output_tokens,
+                    cache_creation: stats.total_cache_creation_tokens,
+                    cache_read: stats.total_cache_read_tokens
+                });
+                total_cost_usd += cost.usd;
+            });
+
+            summary.total_cost_usd = total_cost_usd;
+            summary.total_cost_cny = total_cost_usd * 7.2;
+
+            // 返回包含汇总和按模型分组的数据
+            return {
+                summary: summary,
+                by_model: byModel
+            };
+        }
+
+        function renderTokenStats(statsData) {
+            const list = document.getElementById('configsList');
+
+            // 根据当前选择的时间范围计算汇总数据和按模型分组的数据
+            const periodData = calculatePeriodSummary(statsData, currentTokenPeriod);
+            const periodSummary = periodData.summary;
+            const byModel = periodData.by_model; // 使用过滤后的by_model数据
+
+            let html = '<div style="padding: 20px;">';
+            html += '<h3 style="margin-bottom: 20px; color: #333;">📊 Token使用量统计</h3>';
+
+            // 控制按钮
+            html += '<div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">';
+            html += '<button class="btn btn-primary" id="tokenBtnToday" onclick="changeTokenPeriod(\'today\')">当天统计</button>';
+            html += '<button class="btn btn-secondary" id="tokenBtn7days" onclick="changeTokenPeriod(\'7days\')">7天统计</button>';
+            html += '<button class="btn btn-secondary" id="tokenBtn30days" onclick="changeTokenPeriod(\'30days\')">30天统计</button>';
+            html += '<button class="btn btn-success" onclick="refreshTokenStats()" style="margin-left: auto;">🔄 刷新显示</button>';
+            html += '<button class="btn btn-danger" onclick="resetTokenStats()">🗑️ 清空数据</button>';
+            html += '<small style="color: #666; margin-left: 10px; line-height: 38px;">💡 数据实时自动更新</small>';
+            html += '</div>';
+
+            // 周期标签提示
+            const periodLabels = {
+                'today': '当天',
+                '7days': '最近7天',
+                '30days': '最近30天'
+            };
+            html += '<div style="background: #e3f2fd; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #1976d2;">';
+            html += `📊 当前显示：<strong>${periodLabels[currentTokenPeriod] || '当天'}</strong>累计数据`;
+            html += '</div>';
+
+            // 统计卡片 - 使用周期汇总数据
+            html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">';
+
+            const stats = [
+                { label: '总请求数', value: periodSummary.total_requests || 0, icon: '📈', color: '#667eea' },
+                { label: '总Token数', value: periodSummary.total_tokens || 0, icon: '💎', color: '#764ba2' },
+                { label: '输入Token', value: periodSummary.total_input_tokens || 0, icon: '📥', color: '#28a745' },
+                { label: '输出Token', value: periodSummary.total_output_tokens || 0, icon: '📤', color: '#dc3545' },
+                { label: '缓存创建Token', value: periodSummary.total_cache_creation_tokens || 0, icon: '💾', color: '#ffc107' },
+                { label: '缓存读取Token', value: periodSummary.total_cache_read_tokens || 0, icon: '⚡', color: '#17a2b8' },
+                { label: '总费用(USD)', value: '$' + (periodSummary.total_cost_usd || 0).toFixed(4), icon: '💵', color: '#e74c3c', isText: true },
+                { label: '总费用(CNY)', value: '¥' + (periodSummary.total_cost_cny || 0).toFixed(2), icon: '💰', color: '#e67e22', isText: true }
+            ];
+
+            stats.forEach(stat => {
+                const displayValue = stat.isText ? stat.value : formatNumber(stat.value);
+                html += `
+                    <div style="background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); border-left: 4px solid ${stat.color};">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 8px;">${stat.icon} ${stat.label}</div>
+                        <div style="font-size: 24px; font-weight: bold; color: #333;">${displayValue}</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            // 模型统计表
+            html += '<div style="background: white; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">';
+            html += '<h4 style="margin-bottom: 20px; color: #333;">🤖 模型使用详情</h4>';
+            html += '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: left; border-radius: 5px 0 0 0;">模型名称</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">请求次数</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">总Token</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">输入Token</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">输出Token</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">缓存创建</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">缓存读取</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right;">费用(USD)</th>';
+            html += '<th style="background: #667eea; color: white; padding: 12px; text-align: right; border-radius: 0 5px 5px 0;">费用(CNY)</th>';
+            html += '</tr></thead><tbody>';
+
+            Object.entries(byModel).forEach(([model, stats]) => {
+                // 计算该模型的费用
+                const modelCost = calculateModelCost(model, {
+                    input: stats.total_input_tokens,
+                    output: stats.total_output_tokens,
+                    cache_creation: stats.total_cache_creation_tokens,
+                    cache_read: stats.total_cache_read_tokens
+                });
+
+                html += '<tr style="border-bottom: 1px solid #eee;">';
+                html += `<td style="padding: 12px; font-weight: 600; color: #333;">${model}</td>`;
+                html += `<td style="padding: 12px; text-align: right;">${formatNumber(stats.total_requests)}</td>`;
+                html += `<td style="padding: 12px; text-align: right; font-weight: 600;">${formatNumber(stats.total_tokens)}</td>`;
+                html += `<td style="padding: 12px; text-align: right;">${formatNumber(stats.total_input_tokens)}</td>`;
+                html += `<td style="padding: 12px; text-align: right;">${formatNumber(stats.total_output_tokens)}</td>`;
+                html += `<td style="padding: 12px; text-align: right;">${formatNumber(stats.total_cache_creation_tokens)}</td>`;
+                html += `<td style="padding: 12px; text-align: right;">${formatNumber(stats.total_cache_read_tokens)}</td>`;
+                html += `<td style="padding: 12px; text-align: right; color: #e74c3c; font-weight: 600;">$${modelCost.usd.toFixed(4)}</td>`;
+                html += `<td style="padding: 12px; text-align: right; color: #e67e22; font-weight: 600;">¥${modelCost.cny.toFixed(2)}</td>`;
+                html += '</tr>';
+            });
+
+            if (Object.keys(byModel).length === 0) {
+                html += '<tr><td colspan="9" style="padding: 20px; text-align: center; color: #999;">暂无数据</td></tr>';
+            }
+
+            html += '</tbody></table>';
+            html += '</div>';
+
+            html += '</div>';
+            list.innerHTML = html;
+        }
+
+        function changeTokenPeriod(period) {
+            currentTokenPeriod = period;
+
+            // 更新按钮状态
+            document.getElementById('tokenBtnToday').className = period === 'today' ? 'btn btn-primary' : 'btn btn-secondary';
+            document.getElementById('tokenBtn7days').className = period === '7days' ? 'btn btn-primary' : 'btn btn-secondary';
+            document.getElementById('tokenBtn30days').className = period === '30days' ? 'btn btn-primary' : 'btn btn-secondary';
+
+            // 重新加载数据
+            loadConfigs();
+        }
+
+        async function refreshTokenStats() {
+            try {
+                showToast('正在生成统计数据...', 'success');
+
+                // 触发生成统计
+                await fetch('/api/token-stats/generate', { method: 'POST' });
+
+                // 重新加载
+                await loadConfigs();
+
+                showToast('数据刷新成功！', 'success');
+            } catch (error) {
+                showToast('刷新失败: ' + error.message, 'error');
+            }
+        }
+
+        async function resetTokenStats() {
+            if (!confirm('确定要清空所有统计数据吗？此操作不可恢复！')) {
+                return;
+            }
+
+            try {
+                showToast('正在清空统计数据...', 'success');
+
+                const response = await fetch('/api/token-stats/reset', { method: 'POST' });
+                const result = await response.json();
+
+                if (result.success) {
+                    // 重新加载
+                    await loadConfigs();
+                    showToast('统计数据已清空！', 'success');
+                } else {
+                    showToast('清空失败: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showToast('清空失败: ' + error.message, 'error');
+            }
+        }
+
+        // ========== 错误处理策略渲染和保存 ==========
+        function renderErrorStrategies(strategies) {
+            const list = document.getElementById('configsList');
+            const strategyColors = {
+                'strategy_retry': '#4CAF50',
+                'switch_api': '#FF9800',
+                'normal_retry': '#2196F3'
+            };
+            const strategyLabels = {
+                'strategy_retry': '策略重试(超时重试)',
+                'switch_api': 'API切换',
+                'normal_retry': '不重试'
+            };
+            const strategyDescriptions = {
+                'strategy_retry': '依次尝试超时重试配置列表中的备用节点',
+                'switch_api': '立即切换到下一个API KEY并记录错误',
+                'normal_retry': '直接返回错误给用户，不进行任何重试'
+            };
+
+            // HTTP状态码错误定义
+            const httpStatusCodes = {
+                '400': { name: 'Bad Request', desc: '请求格式错误，可能是参数问题' },
+                '401': { name: 'Unauthorized', desc: '未授权，KEY可能无效' },
+                '403': { name: 'Forbidden', desc: '禁止访问，KEY可能被封禁' },
+                '404': { name: 'Not Found', desc: '资源不存在，可能是API端点变更' },
+                '408': { name: 'Request Timeout', desc: '请求超时，服务器响应时间过长' },
+                '429': { name: 'Too Many Requests', desc: '请求过多，触发限流' },
+                '500': { name: 'Internal Server Error', desc: '服务器内部错误' },
+                '502': { name: 'Bad Gateway', desc: '网关错误，上游服务异常' },
+                '503': { name: 'Service Unavailable', desc: '服务不可用，可能维护中' },
+                '504': { name: 'Gateway Timeout', desc: '网关超时，上游服务器响应超时' },
+                '520': { name: 'Web Server Error', desc: 'Cloudflare: 服务器返回未知错误' },
+                '521': { name: 'Web Server Down', desc: 'Cloudflare: 服务器拒绝连接' },
+                '522': { name: 'Connection Timed Out', desc: 'Cloudflare: 连接超时' },
+                '524': { name: 'Timeout Occurred', desc: 'Cloudflare: 处理超时' },
+                'default': { name: '其他未列出的错误', desc: '所有未明确列出的HTTP状态码的默认处理策略' }
+            };
+
+            // 网络错误定义
+            const networkErrors = {
+                'ReadError': { name: 'SSL读取错误', desc: '网络传输过程中SSL连接异常断开，可能是节点不稳定' },
+                'ConnectError': { name: '连接失败', desc: '无法建立TCP连接，可能是节点宕机或网络不通' },
+                'ReadTimeout': { name: '读取超时', desc: '等待响应时间过长，可能是节点负载高或任务复杂' },
+                'default': { name: '其他网络错误', desc: '所有未明确列出的网络异常的默认处理策略' }
+            };
+
+            let html = '<div style="padding: 20px;">';
+            html += '<h3 style="margin-bottom: 20px;">⚠️ 错误处理策略配置</h3>';
+            html += '<div style="margin-bottom: 30px; padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">';
+            html += '<div style="font-weight: 600; color: #856404; margin-bottom: 8px;">💡 策略说明</div>';
+            html += '<div style="font-size: 13px; color: #856404; line-height: 1.6;">';
+            html += '• <span style="color: ' + strategyColors['strategy_retry'] + '; font-weight: 600;">策略重试</span>: ' + strategyDescriptions['strategy_retry'] + '<br>';
+            html += '• <span style="color: ' + strategyColors['switch_api'] + '; font-weight: 600;">API切换</span>: ' + strategyDescriptions['switch_api'] + '<br>';
+            html += '• <span style="color: ' + strategyColors['normal_retry'] + '; font-weight: 600;">不重试</span>: ' + strategyDescriptions['normal_retry'];
+            html += '</div></div>';
+
+            // HTTP状态码错误组
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
+            html += '<h4 style="color: #333; margin: 0;">📊 HTTP状态码错误</h4>';
+            html += '<div>';
+            html += '<button onclick="batchSetHttpStrategy(\'strategy_retry\')" style="padding: 6px 12px; margin-right: 5px; background: ' + strategyColors['strategy_retry'] + '; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">全部设为策略重试</button>';
+            html += '<button onclick="batchSetHttpStrategy(\'switch_api\')" style="padding: 6px 12px; background: ' + strategyColors['switch_api'] + '; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">全部设为API切换</button>';
+            html += '</div></div>';
+
+            Object.entries(httpStatusCodes).forEach(([code, info]) => {
+                const currentStrategy = strategies.http_status_codes?.[code] || 'strategy_retry';
+                html += '<div style="display: flex; align-items: center; padding: 12px; background: white; border: 1px solid #e8e8e8; border-radius: 6px; margin-bottom: 10px;">';
+                html += '<div style="flex: 1;">';
+                html += `<div style="font-weight: 600; color: #333; margin-bottom: 4px;">${code} - ${info.name}</div>`;
+                html += `<div style="font-size: 12px; color: #666;">${info.desc}</div>`;
+                html += '</div>';
+                html += '<select id="http_' + code + '" style="padding: 8px 12px; border: 2px solid ' + strategyColors[currentStrategy] + '; border-radius: 4px; background: white; cursor: pointer; font-weight: 600; color: ' + strategyColors[currentStrategy] + ';" onchange="updateStrategyColor(this)">';
+                Object.entries(strategyLabels).forEach(([value, label]) => {
+                    html += '<option value="' + value + '" ' + (currentStrategy === value ? 'selected' : '') + '>' + label + '</option>';
+                });
+                html += '</select>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            // 网络错误组
+            html += '<div style="margin-bottom: 30px;">';
+            html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">';
+            html += '<h4 style="color: #333; margin: 0;">🌐 底层网络错误</h4>';
+            html += '<div>';
+            html += '<button onclick="batchSetNetworkStrategy(\'switch_api\')" style="padding: 6px 12px; background: ' + strategyColors['switch_api'] + '; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">全部设为API切换</button>';
+            html += '</div></div>';
+
+            Object.entries(networkErrors).forEach(([errorType, info]) => {
+                const currentStrategy = strategies.network_errors?.[errorType] || 'switch_api';
+                html += '<div style="display: flex; align-items: center; padding: 12px; background: white; border: 1px solid #e8e8e8; border-radius: 6px; margin-bottom: 10px;">';
+                html += '<div style="flex: 1;">';
+                html += `<div style="font-weight: 600; color: #333; margin-bottom: 4px;">${errorType} - ${info.name}</div>`;
+                html += `<div style="font-size: 12px; color: #666;">${info.desc}</div>`;
+                html += '</div>';
+                html += '<select id="network_' + errorType + '" style="padding: 8px 12px; border: 2px solid ' + strategyColors[currentStrategy] + '; border-radius: 4px; background: white; cursor: pointer; font-weight: 600; color: ' + strategyColors[currentStrategy] + ';" onchange="updateStrategyColor(this)">';
+                Object.entries(strategyLabels).forEach(([value, label]) => {
+                    html += '<option value="' + value + '" ' + (currentStrategy === value ? 'selected' : '') + '>' + label + '</option>';
+                });
+                html += '</select>';
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            // 保存按钮
+            html += '<div style="text-align: center; margin-top: 30px;">';
+            html += '<button onclick="saveErrorStrategies()" style="padding: 12px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">💾 保存配置</button>';
+            html += '</div>';
+            
+            html += '</div>';
+            list.innerHTML = html;
+        }
+
+        function updateStrategyColor(selectElement) {
+            const strategyColors = {
+                'strategy_retry': '#4CAF50',
+                'switch_api': '#FF9800',
+                'normal_retry': '#2196F3'
+            };
+            const selectedValue = selectElement.value;
+            selectElement.style.borderColor = strategyColors[selectedValue];
+            selectElement.style.color = strategyColors[selectedValue];
+        }
+
+        function batchSetHttpStrategy(strategy) {
+            const httpCodes = ['400', '401', '403', '404', '408', '429', '500', '502', '503', '504', '520', '521', '522', '524', 'default'];
+            httpCodes.forEach(code => {
+                const select = document.getElementById('http_' + code);
+                if (select) {
+                    select.value = strategy;
+                    updateStrategyColor(select);
+                }
+            });
+        }
+
+        function batchSetNetworkStrategy(strategy) {
+            const networkTypes = ['ReadError', 'ConnectError', 'ReadTimeout', 'default'];
+            networkTypes.forEach(type => {
+                const select = document.getElementById('network_' + type);
+                if (select) {
+                    select.value = strategy;
+                    updateStrategyColor(select);
+                }
+            });
+        }
+
+        async function saveErrorStrategies() {
+            const httpCodes = ['400', '401', '403', '404', '408', '429', '500', '502', '503', '504', '520', '521', '522', '524', 'default'];
+            const networkTypes = ['ReadError', 'ConnectError', 'ReadTimeout', 'default'];
+
+            const strategies = {
+                http_status_codes: {},
+                network_errors: {}
+            };
+
+            httpCodes.forEach(code => {
+                const select = document.getElementById('http_' + code);
+                if (select) {
+                    strategies.http_status_codes[code] = select.value;
+                }
+            });
+
+            networkTypes.forEach(type => {
+                const select = document.getElementById('network_' + type);
+                if (select) {
+                    strategies.network_errors[type] = select.value;
+                }
+            });
+
+            try {
+                const response = await fetch('/api/error-strategies', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(strategies)
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (error) {
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        loadConfigs();
+        
+        // 初始化重置冷却按钮的显示状态
+        const resetCooldownBtn = document.getElementById('resetCooldownBtn');
+        if (currentTab === 'api' || currentTab === 'codex') {
+            resetCooldownBtn.style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

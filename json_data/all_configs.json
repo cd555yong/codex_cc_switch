@@ -1,0 +1,542 @@
+{
+  "api_configs": [
+    {
+      "name": "GLM",
+      "base_url": "https://open.bigmodel.cn/api/anthropic",
+      "key": "128a2",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "enabled": false,
+      "created_at": "2025-10-31T09:37:03.296231",
+      "updated_at": "2025-10-31T09:38:14.672131"
+    },
+    {
+      "name": "minimaxi M2",
+      "base_url": "https://api.minimaxi.com/anthropic",
+      "key": "eyJhb",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "enabled": false,
+      "created_at": "2025-10-31T09:38:18.795561",
+      "updated_at": "2025-10-31T09:42:44.084849"
+    },
+    {
+      "name": "拼车",
+      "base_url": "http://34.169.9.96:3000/api",
+      "key": "cr_16",
+      "type": "primary",
+      "enabled": false,
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "created_at": "2025-11-01T15:30:00.849967",
+      "updated_at": "2025-11-18T15:10:15.979062",
+      "activation_enabled": false,
+      "activation_time": "08:00"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-WO",
+      "type": "primary",
+      "name": "周一KEY",
+      "enabled": true,
+      "time_enabled": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "updated_at": "2025-11-02T10:32:17.657450"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-o4",
+      "type": "primary",
+      "name": "周二KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "updated_at": "2025-11-06T09:22:44.050576",
+      "activation_enabled": false,
+      "activation_time": "08:00"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-7t",
+      "type": "primary",
+      "name": "周三KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      "updated_at": "2025-11-02T10:28:16.286207"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-0y",
+      "type": "primary",
+      "name": "周四KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "updated_at": "2025-11-02T10:35:27.621615"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-Ed",
+      "type": "primary",
+      "name": "周五KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "updated_at": "2025-11-14T14:54:26.252463",
+      "activation_time": "00:16",
+      "activation_enabled": false
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-Zm",
+      "type": "primary",
+      "name": "周六KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "updated_at": "2025-11-18T19:16:44.321387",
+      "activation_enabled": false,
+      "activation_time": "08:00"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-JO",
+      "type": "primary",
+      "name": "周日KEY",
+      "enabled": true,
+      "time_enabled": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "updated_at": "2025-11-15T23:47:44.247672"
+    },
+    {
+      "name": "88code",
+      "base_url": "https://www.88code.org/api",
+      "key": "88_72",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "enabled": true,
+      "created_at": "2025-11-12T09:28:10.581932",
+      "updated_at": "2025-11-13T09:04:33.164657"
+    },
+    {
+      "name": "拼车",
+      "base_url": "http://34.169.9.96:3000/api",
+      "key": "cr_16",
+      "type": "primary",
+      "enabled": true,
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "updated_at": "2025-11-07T17:45:01.295353"
+    },
+    {
+      "name": "chat6",
+      "base_url": "https://ai.chat6.me/claude_api",
+      "key": "sk-an",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "enabled": true,
+      "created_at": "2025-10-31T15:14:10.655934",
+      "updated_at": "2025-11-18T15:10:03.150346",
+      "activation_enabled": true,
+      "activation_time": "11:39"
+    },
+    {
+      "name": "备用流量",
+      "base_url": "https://anyrouter.top",
+      "key": "sk-JO",
+      "type": "backup",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "enabled": true,
+      "created_at": "2025-10-29T17:06:17.624101",
+      "updated_at": "2025-10-29T17:07:21.448965"
+    }
+  ],
+  "codex_configs": [
+    {
+      "name": "chat6",
+      "base_url": "https://ai.chat6.me/codex/v1",
+      "key": "sk-Uf",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "updated_at": "2025-11-17T23:39:54.879551",
+      "enabled": true,
+      "activation_enabled": true,
+      "activation_time": "23:40"
+    },
+    {
+      "name": "拼车",
+      "base_url": "http://34.169.9.96:3000/openai",
+      "key": "cr_16",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "updated_at": "2025-11-10T08:57:34.414851",
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "enabled": true
+    },
+    {
+      "base_url": "https://fizzlycode.com/openai",
+      "key": "cr_2e",
+      "type": "primary",
+      "name": "fizzlycode",
+      "enabled": true,
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "created_at": "2025-10-31T18:48:12.283783",
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "updated_at": "2025-11-10T08:57:24.071536"
+    },
+    {
+      "name": "anyrouter",
+      "base_url": "https://anyrouter.top/v1",
+      "key": "sk-JO",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "updated_at": "2025-10-31T15:58:49.283076"
+    },
+    {
+      "name": "88code",
+      "base_url": "https://www.88code.org/openai/v1",
+      "key": "88_72",
+      "type": "primary",
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "activation_enabled": false,
+      "activation_time": "08:00",
+      "enabled": true,
+      "created_at": "2025-11-12T09:33:48.856738",
+      "updated_at": "2025-11-17T06:57:38.749632"
+    },
+    {
+      "base_url": "https://api.codemirror.codes/v1",
+      "key": "sk-fG",
+      "type": "primary",
+      "name": "codemirror",
+      "enabled": true,
+      "time_enabled": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "updated_at": "2025-11-10T08:56:58.457498",
+      "activation_enabled": false,
+      "activation_time": "08:00"
+    }
+  ],
+  "retry_configs": [
+    {
+      "name": "chat6",
+      "base_url": "https://ai.chat6.me/claude_api",
+      "key": "sk-an",
+      "enabled": true,
+      "created_at": "2025-11-02T00:33:19.501398",
+      "updated_at": "2025-11-08T15:06:07.122069"
+    },
+    {
+      "base_url": "http://34.169.9.96:3000/api",
+      "key": "cr_16",
+      "name": "拼车",
+      "enabled": true,
+      "updated_at": "2025-11-08T15:06:00.346931"
+    },
+    {
+      "base_url": "https://anyrouter.top",
+      "key": "sk-JO",
+      "name": "any",
+      "enabled": true,
+      "updated_at": "2025-11-08T15:05:52.669729"
+    },
+    {
+      "name": "codemirror",
+      "base_url": "https://api.codemirror.codes/",
+      "key": "sk-fG",
+      "enabled": true,
+      "created_at": "2025-10-30T10:22:16.246892",
+      "updated_at": "2025-10-30T10:25:23.791692"
+    }
+  ],
+  "timeout_settings": {
+    "connect_timeout": 30,
+    "write_timeout": 60,
+    "pool_timeout": 120,
+    "streaming_read_timeout": 90,
+    "non_streaming_read_timeout": 299,
+    "extended_connect_timeout": 300,
+    "api_cooldown_seconds": 600,
+    "api_error_threshold": 3,
+    "codex_base_timeout": 60,
+    "codex_timeout_increment": 60,
+    "codex_error_threshold": 3,
+    "codex_connect_timeout": 90,
+    "primary_api_check_interval": 30,
+    "billing_cycle_delay": 60,
+    "health_check_interval": 0.5,
+    "billing_send_interval": 1,
+    "stream_retry_wait": 1,
+    "strategy_retry_read_timeout": 60,
+    "modify_retry_headers": true,
+    "max_retries": 1,
+    "updated_at": "2025-11-18T10:08:19.802308"
+  },
+  "model_conversions": [
+    {
+      "name": "Haiku转Sonnet 4",
+      "source_model": "claude-3-5-haiku-20241022",
+      "target_model": "claude-sonnet-4-5-20250929",
+      "conversion_type": "full_format",
+      "updated_at": "2025-10-30T15:34:19.046113",
+      "enabled": true
+    },
+    {
+      "name": "sonnet-4转sonnet-4-5",
+      "source_model": "claude-sonnet-4-20250514",
+      "target_model": "claude-sonnet-4-5-20250929",
+      "conversion_type": "simple_rename",
+      "updated_at": "2025-11-03T19:23:59.042911"
+    },
+    {
+      "name": "opus-4-1转sonnet-4-5",
+      "source_model": "claude-opus-4-1-20250805",
+      "target_model": "claude-sonnet-4-5-20250929",
+      "conversion_type": "simple_rename",
+      "updated_at": "2025-11-03T18:59:55.722112",
+      "enabled": true
+    },
+    {
+      "name": "haiku-4-5转sonnet-4-5",
+      "source_model": "claude-haiku-4-5-20251001",
+      "target_model": "claude-sonnet-4-5-20250929",
+      "conversion_type": "simple_rename",
+      "enabled": false,
+      "created_at": "2025-11-15T18:43:49.038135",
+      "updated_at": "2025-11-15T18:44:09.112039"
+    },
+    {
+      "name": "gpt-5-codex转gpt-5.1-High",
+      "source_model": "gpt-5-codex",
+      "target_model": "gpt-5.1",
+      "conversion_type": "simple_rename",
+      "updated_at": "2025-11-18T15:00:07.418933",
+      "enabled": true
+    },
+    {
+      "name": "gpt-5.1-codex转gpt-5.1-High",
+      "source_model": "gpt-5.1-codex",
+      "target_model": "gpt-5.1",
+      "conversion_type": "simple_rename",
+      "enabled": false,
+      "created_at": "2025-11-15T16:08:45.925450",
+      "updated_at": "2025-11-18T15:00:29.547031"
+    }
+  ],
+  "openai_to_claude_configs": [
+    {
+      "base_url": "http://34.169.9.96:3000/api",
+      "key": "cr_16",
+      "type": "openai_to_claude",
+      "name": "拼车",
+      "enabled": true,
+      "updated_at": "2025-11-18T15:08:57.501322"
+    },
+    {
+      "name": "anyrouter",
+      "base_url": "https://anyrouter.top",
+      "key": "sk-Zm",
+      "type": "openai_to_claude",
+      "enabled": true,
+      "created_at": "2025-11-16T20:41:39.414334",
+      "updated_at": "2025-11-16T20:41:59.841914"
+    },
+    {
+      "name": "chat6",
+      "base_url": "https://ai.chat6.me/claude_api",
+      "key": "sk-an",
+      "type": "openai_to_claude",
+      "enabled": true,
+      "created_at": "2025-10-30T23:17:31.588727",
+      "updated_at": "2025-11-18T15:10:46.245365"
+    }
+  ],
+  "error_handling_strategies": {
+    "http_status_codes": {
+      "400": "switch_api",
+      "401": "switch_api",
+      "403": "switch_api",
+      "404": "normal_retry",
+      "408": "switch_api",
+      "429": "switch_api",
+      "500": "switch_api",
+      "502": "switch_api",
+      "503": "switch_api",
+      "504": "switch_api",
+      "520": "switch_api",
+      "521": "switch_api",
+      "522": "switch_api",
+      "524": "switch_api",
+      "default": "switch_api"
+    },
+    "network_errors": {
+      "ReadError": "normal_retry",
+      "ConnectError": "normal_retry",
+      "ReadTimeout": "normal_retry",
+      "default": "switch_api"
+    }
+  },
+  "optimization_settings": {
+    "enable_cache_control_limit": true,
+    "updated_at": "2025-11-18T10:08:19.836466"
+  }
+}
